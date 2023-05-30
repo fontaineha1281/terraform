@@ -31,9 +31,10 @@ module "vpc" {
 }
 
 module "rds" {
-  source              = "./RDS"
+  source = "./RDS"
+  state  = local.state
+
   region              = var.region
-  state               = var.state
   db-name             = var.db-name
   username            = var.username
   password            = var.password
@@ -49,18 +50,18 @@ module "rds" {
 }
 
 module "ec2" {
-  source = "./EC2"
-  instance-type = var.instance-type
-  vpc-id = module.vpc.vpc-id
+  source               = "./EC2"
+  instance-type        = var.instance-type
+  vpc-id               = module.vpc.vpc-id
   private-subnet-id-01 = module.vpc.private-subnet-ids-01
-  ec2-sg-id = module.vpc.ec2-sg-id
+  ec2-sg-id            = module.vpc.ec2-sg-id
 }
 
 module "elb" {
-  source = "./ELB"
-  vpc-id = module.vpc.vpc-id
+  source              = "./ELB"
+  vpc-id              = module.vpc.vpc-id
   public-subnet-id-01 = module.vpc.public-subnet-ids-01
   public-subnet-id-02 = module.vpc.public-subnet-ids-02
-  alb-sg-id = module.vpc.alb-sg-id
-  ec2-backend-id = module.ec2.ec2-backend-id
+  alb-sg-id           = module.vpc.alb-sg-id
+  ec2-backend-id      = module.ec2.ec2-backend-id
 }
