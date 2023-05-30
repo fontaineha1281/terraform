@@ -29,3 +29,14 @@ resource "aws_lb_target_group_attachment" "aime-target-group-attachment" {
   target_id        = var.ec2-backend-id
   port             = 80
 }
+
+resource "aws_lb_listener" "aime-lb-listener" {
+  load_balancer_arn = aws_lb.aime-alb.arn
+  port              = "80"
+  protocol          = "HTTP"
+
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.aime-target-group.arn
+  }
+}

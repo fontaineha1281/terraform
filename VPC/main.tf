@@ -202,21 +202,22 @@ resource "aws_security_group_rule" "aime-ingress-alb-traffic" {
 }
 
 resource "aws_security_group_rule" "aime-egress-alb-traffic" {
+  description = "ALB outbound traffic from backend EC2"
   type                     = "egress"
   from_port                = 80
   to_port                  = 80
   protocol                 = "tcp"
   security_group_id        = aws_security_group.aime-alb-sg.id
-  source_security_group_id = aws_security_group.aime-ec2-sg.id
+  source_security_group_id = aws_security_group.aime-backend-ec2-sg.id
 }
 
 ####################################################################
-# Security group for EC2
+# Security group for backend EC2
 ####################################################################
 
 # Create sg for EC2
-resource "aws_security_group" "aime-ec2-sg" {
-  name_prefix = "aime-ec2"
+resource "aws_security_group" "aime-backend-ec2-sg" {
+  name_prefix = "aime-backend-ec2"
   description = "Security group for EC2"
   vpc_id      = aws_vpc.aime-vpc.id
 
@@ -232,12 +233,13 @@ resource "aws_security_group" "aime-ec2-sg" {
   }
 }
 
-resource "aws_security_group_rule" "aime-ingress-ec2-traffic" {
+resource "aws_security_group_rule" "aime-ingress-backend-ec2-traffic-from-alb" {
+  description = "Backend ec2 inbound traffic from ALB"
   type                     = "ingress"
   from_port                = 80
   to_port                  = 80
   protocol                 = "tcp"
-  security_group_id        = aws_security_group.aime-ec2-sg.id
+  security_group_id        = aws_security_group.aime-backend-ec2-sg.id
   source_security_group_id = aws_security_group.aime-alb-sg.id
 }
 
@@ -263,11 +265,12 @@ resource "aws_security_group" "aime-rds-sg" {
   }
 }
 
-resource "aws_security_group_rule" "aime-ingress-rds-traffic" {
+resource "aws_security_group_rule" "aime-ingress-rds-traffic-from-ec2" {
+  description = " RDS inbound traffic from backend EC2"
   type              = "ingress"
   from_port         = 3306
   to_port           = 3306
   protocol          = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
   security_group_id = aws_security_group.aime-rds-sg.id
+  source_security_group_id = aws_security_group.aime-backend-ec2-sg.id
 }

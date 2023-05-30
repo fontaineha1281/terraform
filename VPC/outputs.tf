@@ -27,7 +27,7 @@ output "rds-sg-id" {
 }
 
 output "ec2-sg-id" {
-  value = aws_security_group.aime-ec2-sg.id
+  value = aws_security_group.aime-backend-ec2-sg.id
 }
 
 output "alb-sg-id" {

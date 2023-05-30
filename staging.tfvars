@@ -8,8 +8,8 @@ state = "staging"
 
 region                 = "us-west-1"
 db-name                = "aime"
-username               = "bibichannel"
-password               = "bibichannel"
+username               = "vuduyha"
+password               = "vuduyha"
 instance-class         = "db.t2.micro"
 allocated-storage      = 5
 publicly-accessible    = false

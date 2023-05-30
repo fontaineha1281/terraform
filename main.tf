@@ -51,6 +51,7 @@ module "rds" {
 module "ec2" {
   source               = "./EC2"
   instance-type        = var.instance-type
+
   vpc-id               = module.vpc.vpc-id
   private-subnet-id-01 = module.vpc.private-subnet-ids-01
   ec2-sg-id            = module.vpc.ec2-sg-id
