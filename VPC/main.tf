@@ -1,6 +1,5 @@
 locals {
   block = var.state == "staging" ? 0 : 1
-  env   = var.state == "staging" ? "staging" : "production"
 }
 
 data "aws_availability_zones" "available-zones" {}
@@ -14,7 +13,7 @@ resource "aws_vpc" "aime-vpc" {
   cidr_block           = format("10.%d.0.0/20", local.block)
   enable_dns_hostnames = true
   tags = {
-    Name = "aime-${local.env}-vpc"
+    Name = "aime-${var.state}-vpc"
   }
 }
 
@@ -27,7 +26,7 @@ resource "aws_internet_gateway" "aime-ig" {
   vpc_id = aws_vpc.aime-vpc.id
 
   tags = {
-    Name = "aime-${local.env}-internet-gateway"
+    Name = "aime-${var.state}-internet-gateway"
   }
 }
 
@@ -39,7 +38,7 @@ resource "aws_internet_gateway" "aime-ig" {
 resource "aws_eip" "aime-eip" {
 
   tags = {
-    Name = "aime-${local.env}-eip"
+    Name = "aime-${var.state}-eip"
   }
 }
 
@@ -49,7 +48,7 @@ resource "aws_nat_gateway" "aime-nat-gateway" {
   allocation_id = aws_eip.aime-eip.id
 
   tags = {
-    Name = "aime-${local.env}-nat-gateway"
+    Name = "aime-${var.state}-nat-gateway"
   }
 }
 
@@ -66,7 +65,7 @@ resource "aws_subnet" "aime-public-subnet-01" {
   vpc_id            = aws_vpc.aime-vpc.id
 
   tags = {
-    Name = "aime-${local.env}-public-subnet-01"
+    Name = "aime-${var.state}-public-subnet-01"
   }
 }
 
@@ -78,7 +77,7 @@ resource "aws_subnet" "aime-public-subnet-02" {
   vpc_id            = aws_vpc.aime-vpc.id
 
   tags = {
-    Name = "aime-${local.env}-public-subnet-02"
+    Name = "aime-${var.state}-public-subnet-02"
   }
 }
 
@@ -92,7 +91,7 @@ resource "aws_route_table" "aime-public-rtb" {
   }
 
   tags = {
-    Name = "aime-${local.env}-public-route-table"
+    Name = "aime-${var.state}-public-route-table"
   }
 }
 
@@ -119,7 +118,7 @@ resource "aws_subnet" "aime-private-subnet-01" {
   vpc_id            = aws_vpc.aime-vpc.id
 
   tags = {
-    Name = "aime-${local.env}-private-subnet-01"
+    Name = "aime-${var.state}-private-subnet-01"
   }
 }
 
@@ -133,7 +132,7 @@ resource "aws_route_table" "aime-private-rtb" {
   }
 
   tags = {
-    Name = "aime-${local.env}-private-route-table"
+    Name = "aime-${var.state}-private-route-table"
   }
 }
 
@@ -153,22 +152,22 @@ resource "aws_route_table_association" "aime-private-rtb-association" {
 # Database Subnet
 ####################################################################
 resource "aws_subnet" "aime-database-subnet-01" {
-  cidr_block        = format("10.%d.%d.0/24", local.block, 20)
+  cidr_block        = format("10.%d.%d.0/24", local.block, 13)
   availability_zone = data.aws_availability_zones.available-zones.names[1 % length(data.aws_availability_zones.available-zones.names)]
   vpc_id            = aws_vpc.aime-vpc.id
 
   tags = {
-    Name = "aime-${local.env}-database-subnet-01"
+    Name = "aime-${var.state}-database-subnet-01"
   }
 }
 
 resource "aws_subnet" "aime-database-subnet-02" {
-  cidr_block        = format("10.%d.%d.0/24", local.block, 21)
+  cidr_block        = format("10.%d.%d.0/24", local.block, 14)
   availability_zone = data.aws_availability_zones.available-zones.names[2 % length(data.aws_availability_zones.available-zones.names)]
   vpc_id            = aws_vpc.aime-vpc.id
 
   tags = {
-    Name = "aime-${local.env}-database-subnet-02"
+    Name = "aime-${var.state}-database-subnet-02"
   }
 }
 ####################################################################
@@ -189,7 +188,7 @@ resource "aws_security_group" "aime-alb-sg" {
   }
 
   tags = {
-    Name = "aime-${local.env}-alb-sg"
+    Name = "aime-${var.state}-alb-sg"
   }
 }
 
@@ -229,7 +228,7 @@ resource "aws_security_group" "aime-ec2-sg" {
   }
 
   tags = {
-    Name = "aime-${local.env}-ec2-sg"
+    Name = "aime-${var.state}-ec2-sg"
   }
 }
 
@@ -260,7 +259,7 @@ resource "aws_security_group" "aime-rds-sg" {
   }
 
   tags = {
-    Name = "aime-${local.env}-rds-sg"
+    Name = "aime-${var.state}-rds-sg"
   }
 }
 
@@ -269,5 +268,6 @@ resource "aws_security_group_rule" "aime-ingress-rds-traffic" {
   from_port         = 3306
   to_port           = 3306
   protocol          = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
   security_group_id = aws_security_group.aime-rds-sg.id
 }

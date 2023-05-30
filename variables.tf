@@ -1,6 +1,17 @@
 variable "region" {
-  description = "AWS region"
-  default = "us-east-1"
+  type = string
+  description = "Region of aws"
+  default = "us-west-1"
+}
+
+variable "access-key" {
+  type = string
+  description = "My Access Key ID"
+}
+
+variable "secret-key" {
+  type = string
+  description = "My Secret Access Key"
 }
 
 ####################################################################
@@ -10,14 +21,13 @@ variable "region" {
 variable "state" {
   type = string
   description = "Environment for project"
-  default = "staging"
 }
 
 ####################################################################
 # RDS
 ####################################################################
 
-variable "db_name" {
+variable "db-name" {
   description = "RDS database name"
 }
 
@@ -31,16 +41,25 @@ variable "password" {
   sensitive   = true
 }
 
-variable "instance_class" {
+variable "instance-class" {
   description = "RDS instance class"
   default = "db.t2.micro"
 }
 
-variable "allocated_storage" {
+variable "allocated-storage" {
   description = "RDS allocated storage (in GB)"
   default = "5"
 }
-variable "publicly_accessible" {
+variable "publicly-accessible" {
   description = "RDS publicly accessible"
   default     = false
+}
+
+####################################################################
+# EC2
+####################################################################
+
+variable "instance-type" {
+  type = string
+  description = "Instance type of the EC2"
 }

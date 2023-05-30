@@ -1,7 +1,21 @@
-region                 = "us-east-1"
-db_name                = "aime"
+access-key = ""
+secret-key = ""
+state = "staging"
+
+####################################################################
+# RDS
+####################################################################
+
+region                 = "us-west-1"
+db-name                = "aime"
 username               = "haduyanh"
 password               = "haduyanh"
-instance_class         = "db.t2.micro"
-allocated_storage      = 5
-publicly_accessible    = false
+instance-class         = "db.t2.micro"
+allocated-storage      = 5
+publicly-accessible    = false
+
+####################################################################
+# EC2
+####################################################################
+
+instance-type = "t2.micro"

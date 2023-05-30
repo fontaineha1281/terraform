@@ -1,8 +1,34 @@
 variable "region" {
+  type = string
   description = "AWS region"
 }
 
-variable "db_name" {
+variable "vpc-id" {
+  type = any
+  description = "RDS VPC ID"
+}
+
+variable "state" {
+  type = string
+  description = "Environment of project"
+}
+
+variable "rds-sg-id" {
+  type = any
+  description = "ID of RDS security group"
+}
+
+variable "database-subnet-ids-01" {
+  type = any
+  description = "ID of database subnet 01"
+}
+
+variable "database-subnet-ids-02" {
+  type = any
+  description = "ID of database subnet 02"
+}
+
+variable "db-name" {
   type        = string
   description = "RDS database name"
   default = "aime"
@@ -21,29 +47,19 @@ variable "password" {
   sensitive   = true
 }
 
-variable "instance_class" {
+variable "instance-class" {
   description = "RDS instance class"
   default = "db.t2.micro"
 }
 
-variable "allocated_storage" {
+variable "allocated-storage" {
   description = "RDS allocated storage (in GB)"
   default = "5"
 }
 
-variable "publicly_accessible" {
+variable "publicly-accessible" {
   description = "RDS publicly accessible"
   default     = false
 }
 
-variable "rds_sg_id" {
-  description = "RDS Secutiry Group"
-}
 
-variable "private_subnet_ids-01" {
-  description = "RDS Subnet Private"
-}
-
-variable "vpc_id" {
-  description = "RDS VPC ID"
-}

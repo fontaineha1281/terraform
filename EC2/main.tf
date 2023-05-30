@@ -31,11 +31,11 @@ resource "aws_key_pair" "aime-ec2-kp" {
 }
 
 ####################################################################
-# EC2
+# EC2 backend
 ####################################################################
 
 # Create ec2
-resource "aws_instance" "aime-ec2" {
+resource "aws_instance" "aime-ec2-backend" {
   ami                    = data.aws_ami.amazon-linux-2.id
   instance_type          = var.instance-type
   key_name               = aws_key_pair.aime-ec2-kp.key_name
@@ -51,3 +51,7 @@ resource "aws_instance" "aime-ec2" {
     create_before_destroy = true
   }
 }
+
+####################################################################
+# Bastion host
+####################################################################
