@@ -1,16 +1,6 @@
 variable "region" {
   description = "AWS region"
-  default = ""
-}
-
-variable "access_key" {
-  type = string
-  description = "My Access Key ID"
-}
-
-variable "secret_key" {
-  type = string
-  description = "My Secret Access Key"
+  default = "us-east-1"
 }
 
 ####################################################################

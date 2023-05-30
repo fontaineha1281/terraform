@@ -6,17 +6,6 @@ terraform {
     }
   }
 
-  backend "s3" {
-    bucket = "aime-terraform-state"
-    key    = "staging/terraform.tfstate"
-    region = "us-west-1"
-  }
-}
-
-provider "aws" {
-  region = var.region
-  access_key = var.access_key
-  secret_key = var.secret_key
 }
 
 module "vpc" {
@@ -32,6 +21,9 @@ module "rds" {
   instance_class = var.instance_class
   allocated_storage = var.allocated_storage
   publicly_accessible = var.publicly_accessible
+  vpc_id = module.vpc.vpc_id
+  rds_sg_id = module.vpc.rds_sg_id
+  private_subnet_ids-01 = module.vpc.private_subnet_ids-01
 }
 
 

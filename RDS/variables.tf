@@ -36,3 +36,15 @@ variable "publicly_accessible" {
   description = "RDS publicly accessible"
   default     = false
 }
+
+variable "rds_sg_id" {
+  description = "RDS Secutiry Group"
+}
+
+variable "private_subnet_ids-01" {
+  description = "RDS Subnet Private"
+}
+
+variable "vpc_id" {
+  description = "RDS VPC ID"
+}
