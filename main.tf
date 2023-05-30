@@ -21,7 +21,6 @@ provider "aws" {
 }
 
 locals {
-  block = var.state == "staging" ? 0 : 1
   state = var.state == "staging" ? "staging" : "production"
 }
 
