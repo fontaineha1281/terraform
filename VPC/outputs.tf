@@ -1,19 +1,35 @@
-output "vpc_id" {
+output "vpc-id" {
   value = aws_vpc.aime-vpc.id
 }
 
-output "public_subnet_ids-01" {
+output "public-subnet-ids-01" {
   value = aws_subnet.aime-public-subnet-01.id
 }
 
-output "private_subnet_ids-01" {
+output "public-subnet-ids-02" {
+  value = aws_subnet.aime-public-subnet-02.id
+}
+
+output "private-subnet-ids-01" {
   value = aws_subnet.aime-private-subnet-01.id
 }
 
-output "eip_public_ip" {
-  value = aws_eip.aime-eip.public_ip
+output "database-subnet-ids-01" {
+  value = aws_subnet.aime-database-subnet-01.id
 }
 
-output "rds_sg_id" {
-  value = aws_security_group.aime-dbs-sg.id
+output "database-subnet-ids-02" {
+  value = aws_subnet.aime-database-subnet-02.id
+}
+
+output "rds-sg-id" {
+  value = aws_security_group.aime-rds-sg.id
+}
+
+output "ec2-sg-id" {
+  value = aws_security_group.aime-ec2-sg.id
+}
+
+output "alb-sg-id" {
+  value = aws_security_group.aime-alb-sg.id
 }

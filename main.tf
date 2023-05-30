@@ -8,12 +8,17 @@ terraform {
 
 }
 
+provider "aws" {
+  region = var.region
+}
+
 module "vpc" {
   source = "./VPC"
   state = var.state
 }
 
 module "rds" {
+  region = var.region
   source  = "./RDS"
   db_name = var.db_name
   username = var.username

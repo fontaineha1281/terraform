@@ -1,6 +1,6 @@
 locals {
   block = var.state == "staging" ? 0 : 1
-  env = var.state == "staging" ? "staging" : "production"
+  env   = var.state == "staging" ? "staging" : "production"
 }
 
 data "aws_availability_zones" "available-zones" {}
@@ -45,7 +45,7 @@ resource "aws_eip" "aime-eip" {
 
 # create NAT gateway
 resource "aws_nat_gateway" "aime-nat-gateway" {
-  subnet_id = aws_subnet.aime-public-subnet-01.id
+  subnet_id     = aws_subnet.aime-public-subnet-01.id
   allocation_id = aws_eip.aime-eip.id
 
   tags = {
@@ -61,12 +61,24 @@ resource "aws_nat_gateway" "aime-nat-gateway" {
 resource "aws_subnet" "aime-public-subnet-01" {
   map_public_ip_on_launch = true
 
-  cidr_block = format("10.%d.%d.0/24", local.block, 1)
-  availability_zone =  data.aws_availability_zones.available-zones.names[1 % length(data.aws_availability_zones.available-zones.names)]
-  vpc_id     = aws_vpc.aime-vpc.id
+  cidr_block        = format("10.%d.%d.0/24", local.block, 1)
+  availability_zone = data.aws_availability_zones.available-zones.names[1 % length(data.aws_availability_zones.available-zones.names)]
+  vpc_id            = aws_vpc.aime-vpc.id
 
   tags = {
     Name = "aime-${local.env}-public-subnet-01"
+  }
+}
+
+resource "aws_subnet" "aime-public-subnet-02" {
+  map_public_ip_on_launch = true
+
+  cidr_block        = format("10.%d.%d.0/24", local.block, 2)
+  availability_zone = data.aws_availability_zones.available-zones.names[2 % length(data.aws_availability_zones.available-zones.names)]
+  vpc_id            = aws_vpc.aime-vpc.id
+
+  tags = {
+    Name = "aime-${local.env}-public-subnet-02"
   }
 }
 
@@ -85,7 +97,7 @@ resource "aws_route_table" "aime-public-rtb" {
 }
 
 locals {
-  list_public_subnet_id = [aws_subnet.aime-public-subnet-01.id]
+  list_public_subnet_id = [aws_subnet.aime-public-subnet-01.id, aws_subnet.aime-public-subnet-02.id]
 }
 
 # Link the route table to the public subnet to allow instances in the subnet to access the Internet
@@ -102,9 +114,9 @@ resource "aws_route_table_association" "aime-public-rtb-association" {
 
 # Create private subnets
 resource "aws_subnet" "aime-private-subnet-01" {
-  cidr_block = format("10.%d.%d.0/24", local.block, 2)
+  cidr_block        = format("10.%d.%d.0/24", local.block, 10)
   availability_zone = data.aws_availability_zones.available-zones.names[1 % length(data.aws_availability_zones.available-zones.names)]
-  vpc_id     = aws_vpc.aime-vpc.id
+  vpc_id            = aws_vpc.aime-vpc.id
 
   tags = {
     Name = "aime-${local.env}-private-subnet-01"
@@ -116,8 +128,8 @@ resource "aws_route_table" "aime-private-rtb" {
   vpc_id = aws_vpc.aime-vpc.id
 
   route {
-    cidr_block = "0.0.0.0/0"
-    nat_gateway_id  = aws_nat_gateway.aime-nat-gateway.id
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.aime-nat-gateway.id
   }
 
   tags = {
@@ -138,21 +150,37 @@ resource "aws_route_table_association" "aime-private-rtb-association" {
 }
 
 ####################################################################
-# Security group
+# Database Subnet
+####################################################################
+resource "aws_subnet" "aime-database-subnet-01" {
+  cidr_block        = format("10.%d.%d.0/24", local.block, 20)
+  availability_zone = data.aws_availability_zones.available-zones.names[1 % length(data.aws_availability_zones.available-zones.names)]
+  vpc_id            = aws_vpc.aime-vpc.id
+
+  tags = {
+    Name = "aime-${local.env}-database-subnet-01"
+  }
+}
+
+resource "aws_subnet" "aime-database-subnet-02" {
+  cidr_block        = format("10.%d.%d.0/24", local.block, 21)
+  availability_zone = data.aws_availability_zones.available-zones.names[2 % length(data.aws_availability_zones.available-zones.names)]
+  vpc_id            = aws_vpc.aime-vpc.id
+
+  tags = {
+    Name = "aime-${local.env}-database-subnet-02"
+  }
+}
+####################################################################
+# Security group for ALB
 ####################################################################
 
-# Create sg for RDS
-resource "aws_security_group" "aime-dbs-sg" {
-  name_prefix = "aime-lb"
-  description = "Security group for RDS"
+# Create sg for ALB
+resource "aws_security_group" "aime-alb-sg" {
+  name_prefix = "aime-alb"
+  description = "Security group for ALB"
   vpc_id      = aws_vpc.aime-vpc.id
 
-  ingress {
-    from_port = 3306
-    to_port   = 3306
-    protocol  = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
   egress {
     from_port   = 0
     to_port     = 0
@@ -161,6 +189,85 @@ resource "aws_security_group" "aime-dbs-sg" {
   }
 
   tags = {
-    Name = "aime-${local.env}-dbs-sg"
+    Name = "aime-${local.env}-alb-sg"
   }
+}
+
+resource "aws_security_group_rule" "aime-ingress-alb-traffic" {
+  type              = "ingress"
+  from_port         = 80
+  to_port           = 80
+  protocol          = "tcp"
+  cidr_blocks       = ["0.0.0.0/0"]
+  security_group_id = aws_security_group.aime-alb-sg.id
+}
+
+resource "aws_security_group_rule" "aime-egress-alb-traffic" {
+  type                     = "egress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.aime-alb-sg.id
+  source_security_group_id = aws_security_group.aime-ec2-sg.id
+}
+
+####################################################################
+# Security group for EC2
+####################################################################
+
+# Create sg for EC2
+resource "aws_security_group" "aime-ec2-sg" {
+  name_prefix = "aime-ec2"
+  description = "Security group for EC2"
+  vpc_id      = aws_vpc.aime-vpc.id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "aime-${local.env}-ec2-sg"
+  }
+}
+
+resource "aws_security_group_rule" "aime-ingress-ec2-traffic" {
+  type                     = "ingress"
+  from_port                = 80
+  to_port                  = 80
+  protocol                 = "tcp"
+  security_group_id        = aws_security_group.aime-ec2-sg.id
+  source_security_group_id = aws_security_group.aime-alb-sg.id
+}
+
+####################################################################
+# Security group for RDS
+####################################################################
+
+# Create sg for RDS
+resource "aws_security_group" "aime-rds-sg" {
+  name_prefix = "aime-rds"
+  description = "Security group for RDS"
+  vpc_id      = aws_vpc.aime-vpc.id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "aime-${local.env}-rds-sg"
+  }
+}
+
+resource "aws_security_group_rule" "aime-ingress-rds-traffic" {
+  type              = "ingress"
+  from_port         = 3306
+  to_port           = 3306
+  protocol          = "tcp"
+  security_group_id = aws_security_group.aime-rds-sg.id
 }
