@@ -3,6 +3,31 @@ variable "region" {
   default = ""
 }
 
+variable "access_key" {
+  type = string
+  description = "My Access Key ID"
+}
+
+variable "secret_key" {
+  type = string
+  description = "My Secret Access Key"
+}
+
+####################################################################
+# VPC
+####################################################################
+
+variable "state" {
+  type = string
+  description = "Environment for project"
+  default = "staging"
+}
+
+
+####################################################################
+# RDS
+####################################################################
+
 variable "db_name" {
   description = "RDS database name"
 }
